@@ -6,6 +6,16 @@ name: v8-android-arm64
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      v8_version:
+        description: 'v8 version tag'
+        type: choice
+        options:
+          - "13.5.119"
+          - "12.9.202.28" # 2022
+          - "12.4.254.21" # 2019
+        required: true
+        default: "13.5.119"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -36,7 +46,7 @@ jobs:
           # unzip -q android-ndk.zip
           # export ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r23c
           # echo "default_android_ndk_root = \"$GITHUB_WORKSPACE/android-ndk-r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
-          # echo "default_android_ndk_version = \"r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
+          # echo "default_android_ndk_`version` = \"r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
           # cat $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
 
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
@@ -49,7 +59,7 @@ jobs:
           echo "target_os = ['android']" >> .gclient
           cat .gclient
           cd v8
-          git checkout refs/tags/12.4.254.21
+          git checkout refs/tags/${{ github.event.inputs.v8_version }}
           gclient sync -D
 
       - name: Build v8 arm64
@@ -64,8 +74,8 @@ jobs:
 
       - name: Upload
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           path: v8/v8/out.gn/arm64.release/obj/libv8_monolith.a
           name: prebuilt_v8_android_arm64
-        
+
 
