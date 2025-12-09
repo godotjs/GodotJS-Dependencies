@@ -27,6 +27,7 @@ jobs:
           Set-StrictMode -Version Latest
           cd $env:GITHUB_WORKSPACE
           git clone https://libwebsockets.org/repo/libwebsockets
+          git checkout v4.3-stable
 
       - name: Build lws (windows arm64)
         shell: pwsh
