@@ -1,10 +1,6 @@
-# This is a basic workflow to help you get started with Actions
-
 name: v8-android-arm64
 
-# Controls when the workflow will run
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       v8_version:
@@ -16,15 +12,28 @@ on:
           - "12.4.254.21" # 2019
         required: true
         default: "13.5.119"
+      use_loopback:
+        description: 'Enable loopback disk workaround before heavy apt installs (hacky)'
+        type: boolean
+        required: false
+        default: false
+  workflow_call:
+    inputs:
+      v8_version:
+        required: true
+        type: string
+      use_loopback:
+        required: false
+        type: boolean
+        default: false
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    env:
+      V8_VERSION: ${{ inputs.v8_version || github.event.inputs.v8_version }}
+      USE_LOOPBACK: ${{ inputs.use_loopback || github.event.inputs.use_loopback }}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,39 +42,90 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          architecture: 'x64'
 
-      # Runs a single command using the runners shell
+      - name: Cache depot_tools
+        uses: actions/cache@v4
+        with:
+          path: depot_tools
+          key: depot_tools-${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            depot_tools-${{ runner.os }}-
+
+      - name: Cache Android NDK r23c
+        uses: actions/cache@v4
+        with:
+          path: android-ndk-r23c
+          key: android-ndk-r23c-${{ runner.os }}-v23c
+
       # See https://v8.dev/docs/cross-compile-arm
       - name: Fetch v8
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build generate-ninja pkg-config zip unzip
+          set -euo pipefail
+          echo "Disk before any downloads:"
+          df -h
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ninja-build generate-ninja pkg-config zip unzip ca-certificates git
 
-          # cd $GITHUB_WORKSPACE
-          # wget -O android-ndk.zip -q https://dl.google.com/android/repository/android-ndk-r23c-linux.zip
-          # unzip -q android-ndk.zip
-          # export ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r23c
-          # echo "default_android_ndk_root = \"$GITHUB_WORKSPACE/android-ndk-r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
-          # echo "default_android_ndk_`version` = \"r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
-          # cat $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
+          cd $GITHUB_WORKSPACE
+          if [ ! -d "$GITHUB_WORKSPACE/android-ndk-r23c" ]; then
+            wget -O android-ndk.zip -q https://dl.google.com/android/repository/android-ndk-r23c-linux.zip
+            unzip -q android-ndk.zip
+          fi
+          export ANDROID_NDK=$GITHUB_WORKSPACE/android-ndk-r23c
+          echo "default_android_ndk_root = \"$GITHUB_WORKSPACE/android-ndk-r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
+          echo "default_android_ndk_version = \"r23c\"" >> $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
+          cat $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn
 
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          if [ ! -d "$GITHUB_WORKSPACE/depot_tools" ]; then
+            git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          fi
           export PATH=$GITHUB_WORKSPACE/depot_tools:$PATH
           cd depot_tools
           gclient
           mkdir $GITHUB_WORKSPACE/v8
           cd $GITHUB_WORKSPACE/v8
-          fetch v8
+          fetch --nohooks v8
           echo "target_os = ['android']" >> .gclient
           cat .gclient
           cd v8
-          git checkout refs/tags/${{ github.event.inputs.v8_version }}
-          gclient sync -D
+          git fetch origin refs/tags/${{ env.V8_VERSION }}
+          git checkout origin refs/tags/${{ env.V8_VERSION }}
+          gclient sync -D --force --reset
 
       - name: Build v8 arm64
         run: |
+          set -euo pipefail
+          echo "Disk before build-deps:"
+          df -h
           cd $GITHUB_WORKSPACE/v8/v8
+
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates
+
+          if [ "${USE_LOOPBACK:-false}" = "true" ]; then
+            echo "Enabling loopback disk workaround (10G)"
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends e2fsprogs
+            sudo fallocate -l 10G /tmp/extra.img || sudo dd if=/dev/zero of=/tmp/extra.img bs=1M count=10240
+            sudo mkfs.ext4 -F /tmp/extra.img
+            sudo mkdir -p /mnt/extra
+            sudo mount -o loop /tmp/extra.img /mnt/extra
+            sudo mv /var/lib/dpkg /mnt/extra/dpkg || true
+            sudo cp -a /mnt/extra/dpkg /var/lib/dpkg || true
+            sudo rm -rf /var/lib/dpkg/updates/* || true
+            df -h /var/lib/dpkg /mnt/extra || true
+          fi
+
           sh ./build/install-build-deps.sh --android
+
+          # Clean apt caches after heavy install
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
           python ./build/linux/sysroot_scripts/install-sysroot.py --arch=arm64
           python ./tools/dev/v8gen.py arm64.release
           cp $GITHUB_WORKSPACE/Scripts/v8.android_arm64.args.gn $GITHUB_WORKSPACE/v8/v8/out.gn/arm64.release/args.gn
@@ -73,6 +133,7 @@ jobs:
           ninja -C ./out.gn/arm64.release v8_monolith
 
       - name: Upload
+        if: ${{ env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
           path: v8/v8/out.gn/arm64.release/obj/libv8_monolith.a
