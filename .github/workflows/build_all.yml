@@ -192,14 +192,6 @@ jobs:
           echo "Downloaded artifacts layout:"
           ls -R staging || true
 
-          # Normalize layout if some artifacts included an extra staging/ prefix
-          if [ -d "staging/staging/v8" ] && [ ! -d "staging/v8" ]; then
-            mv staging/staging/v8 staging/ || true
-          fi
-          if [ -d "staging/staging/lws" ] && [ ! -d "staging/lws" ]; then
-            mv staging/staging/lws staging/ || true
-          fi
-
           (cd staging && zip -r "v8_${{ github.event.inputs.v8_version }}.zip" v8/)
           echo "Created V8 bundle: staging/v8_${{ github.event.inputs.v8_version }}.zip"
 
@@ -211,8 +203,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.event.inputs.bundle_tag }}" \
-          staging/*.zip \
-          --title "${{ github.event.inputs.bundle_tag }}" \
-          --notes "Update V8 and LWS bundles." \
-          --repo ${{ github.repository }} \
-          --target ${{ github.sha }}
+            staging/*.zip \
+            --title "${{ github.event.inputs.bundle_tag }}" \
+            --notes "V8 and libwebsockets bundles." \
+            --repo ${{ github.repository }} \
+            --target ${{ github.sha }}
