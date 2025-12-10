@@ -35,13 +35,29 @@ jobs:
           set -euo pipefail
           cd "$GITHUB_WORKSPACE"
           git clone https://libwebsockets.org/repo/libwebsockets
+          cd libwebsockets
+          git checkout v4.3-stable
 
       - name: Build lws (macOS x86_64)
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE/libwebsockets"
           mkdir -p out && cd out
-          cmake -DBUILD_SHARED_LIBS=OFF -DLWS_WITH_SSL=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+          cmake \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLWS_WITH_SHARED=OFF \
+            -DLWS_WITH_STATIC=ON \
+            -DLWS_WITH_SSL=0 \
+            -DLWS_WITH_TESTAPPS=OFF \
+            -DLWS_WITH_MINIMAL_EXAMPLES=OFF \
+            -DLWS_WITHOUT_TESTAPPS=ON \
+            -DLWS_INSTALL_EXAMPLES=OFF \
+            -DINSTALL_LWS_TESTAPPS=OFF \
+            -DBUILD_TESTING=OFF \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            ..
           cmake --build . --config Release -- -j2
           cd "$GITHUB_WORKSPACE"
           mkdir -p staging/lws/macos_x86_64_release

@@ -37,6 +37,8 @@ jobs:
             unzip -q android-ndk.zip
           fi
           git clone https://libwebsockets.org/repo/libwebsockets
+          cd libwebsockets
+          git checkout v4.3-stable
 
       - name: Build lws (android x86_64)
         run: |

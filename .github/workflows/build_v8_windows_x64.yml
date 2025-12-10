@@ -2,6 +2,11 @@ name: v8-windows-x64
 
 on:
   workflow_dispatch:
+    inputs:
+      v8_version:
+        description: 'v8 version tag'
+        type: string
+        required: false
   workflow_call:
     inputs:
       v8_version:
@@ -10,7 +15,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     env:
       V8_VERSION: ${{ inputs.v8_version || github.event.inputs.v8_version }}
 
@@ -50,7 +55,7 @@ jobs:
           mkdir v8
           cd v8
           echo _____fetch_____
-          call fetch --nohooks v8
+          call fetch --nohooks --nohistory v8
           echo _____enter_____
           cd v8
           echo _____checkout_____

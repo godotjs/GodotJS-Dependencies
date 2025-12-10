@@ -2,6 +2,11 @@ name: v8-ios-arm64
 
 on:
   workflow_dispatch:
+    inputs:
+      v8_version:
+        description: 'v8 version tag'
+        type: string
+        required: false
   workflow_call:
     inputs:
       v8_version:
@@ -35,7 +40,7 @@ jobs:
           gclient
           mkdir $GITHUB_WORKSPACE/v8
           cd $GITHUB_WORKSPACE/v8
-          fetch --nohooks v8
+          fetch --nohooks --nohistory v8
           echo "target_os = ['ios']" >> .gclient
           cat .gclient
           cd v8

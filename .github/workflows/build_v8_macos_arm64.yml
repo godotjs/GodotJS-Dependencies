@@ -2,6 +2,11 @@ name: v8-macos-arm64
 
 on:
   workflow_dispatch:
+    inputs:
+      v8_version:
+        description: 'v8 version tag'
+        type: string
+        required: false
   workflow_call:
     inputs:
       v8_version:
@@ -36,7 +41,7 @@ jobs:
           gclient
           mkdir $GITHUB_WORKSPACE/v8
           cd $GITHUB_WORKSPACE/v8
-          fetch --nohooks v8
+          fetch --nohooks --nohistory v8
           cd v8
           git fetch origin refs/tags/${{ env.V8_VERSION }}
           git checkout FETCH_HEAD

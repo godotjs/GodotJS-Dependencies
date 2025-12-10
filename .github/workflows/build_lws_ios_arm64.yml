@@ -34,11 +34,8 @@ jobs:
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE"
-          if [ ! -d libwebsockets ]; then
-            git clone https://libwebsockets.org/repo/libwebsockets
-          fi
+          git clone https://libwebsockets.org/repo/libwebsockets
           cd libwebsockets
-          git fetch --tags
           git checkout v4.3-stable
 
       - name: Configure and build lws (iOS Device arm64)

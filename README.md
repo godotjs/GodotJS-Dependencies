@@ -183,7 +183,6 @@ act workflow_dispatch \
   -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 \
   --var HOST_MACOS=true \
   --input v8_version=13.5.119 \
-  --input use_loopback=false \
   -j build
 ```
 
@@ -196,7 +195,6 @@ act workflow_dispatch \
   -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 \
   --var HOST_MACOS=true \
   --input v8_version=13.5.119 \
-  --input use_loopback=false \
   -j build
 ```
 
@@ -209,7 +207,6 @@ act workflow_dispatch \
   -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 \
   --var HOST_MACOS=true \
   --input v8_version=13.5.119 \
-  --input use_loopback=false \
   -j build
 ```
 
@@ -222,7 +219,6 @@ act workflow_dispatch \
   -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 \
   --var HOST_MACOS=true \
   --input v8_version=13.5.119 \
-  --input use_loopback=false \
   -j build
 ```
 
@@ -235,6 +231,5 @@ act workflow_dispatch \
   -P ubuntu-22.04=catthehacker/ubuntu:act-22.04 \
   --var HOST_MACOS=true \
   --input v8_version=13.5.119 \
-  --input use_loopback=false \
   -j build
 ```

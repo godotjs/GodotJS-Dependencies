@@ -7,27 +7,17 @@ on:
         description: 'v8 version tag'
         type: string
         required: false
-      use_loopback:
-        description: 'Enable loopback disk workaround before heavy apt installs (hacky)'
-        type: boolean
-        required: false
-        default: false
   workflow_call:
     inputs:
       v8_version:
         required: true
         type: string
-      use_loopback:
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       V8_VERSION: ${{ inputs.v8_version || github.event.inputs.v8_version }}
-      USE_LOOPBACK: ${{ inputs.use_loopback || github.event.inputs.use_loopback }}
 
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +46,7 @@ jobs:
           sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* || true
           sudo DEBIAN_FRONTEND=noninteractive apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ninja-build generate-ninja pkg-config ca-certificates git
+            ninja-build generate-ninja pkg-config ca-certificates
 
           cd $GITHUB_WORKSPACE
           if [ ! -d "$GITHUB_WORKSPACE/depot_tools" ]; then
@@ -79,24 +69,6 @@ jobs:
           echo "Disk before build-deps:"
           df -h
           cd $GITHUB_WORKSPACE/v8/v8
-
-          sudo apt-get clean || true
-          sudo rm -rf /var/lib/apt/lists/* || true
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates
-
-          if [ "${USE_LOOPBACK:-false}" = "true" ]; then
-            echo "Enabling loopback disk workaround (10G)"
-            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends e2fsprogs
-            sudo fallocate -l 10G /tmp/extra.img || sudo dd if=/dev/zero of=/tmp/extra.img bs=1M count=10240
-            sudo mkfs.ext4 -F /tmp/extra.img
-            sudo mkdir -p /mnt/extra
-            sudo mount -o loop /tmp/extra.img /mnt/extra
-            sudo mv /var/lib/dpkg /mnt/extra/dpkg || true
-            sudo cp -a /mnt/extra/dpkg /var/lib/dpkg || true
-            sudo rm -rf /var/lib/dpkg/updates/* || true
-            df -h /var/lib/dpkg /mnt/extra || true
-          fi
 
           sh ./build/install-build-deps.sh
 

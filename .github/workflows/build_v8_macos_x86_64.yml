@@ -1,9 +1,12 @@
-# This workflow builds V8 for macOS x86_64
-
 name: v8-macos-x86_64
 
 on:
   workflow_dispatch:
+    inputs:
+      v8_version:
+        description: 'v8 version tag'
+        type: string
+        required: false
   workflow_call:
     inputs:
       v8_version:

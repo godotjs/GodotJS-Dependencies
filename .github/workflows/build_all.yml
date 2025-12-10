@@ -16,32 +16,24 @@ on:
           - "12.4.254.21" # 2019
         required: true
         default: "13.5.119"
-      use_loopback:
-        description: 'Enable loopback disk workaround before heavy apt installs (hacky)'
-        type: boolean
-        required: false
-        default: false
 
 jobs:
   v8_android_arm64:
     uses: ./.github/workflows/build_v8_android_arm64.yml
     with:
       v8_version: ${{ inputs.v8_version }}
-      use_loopback: ${{ inputs.use_loopback }}
     secrets: inherit
 
   v8_android_arm32:
     uses: ./.github/workflows/build_v8_android_arm32.yml
     with:
       v8_version: ${{ inputs.v8_version }}
-      use_loopback: ${{ inputs.use_loopback }}
     secrets: inherit
 
   v8_android_x86_64:
     uses: ./.github/workflows/build_v8_android_x86_64.yml
     with:
       v8_version: ${{ inputs.v8_version }}
-      use_loopback: ${{ inputs.use_loopback }}
     secrets: inherit
 
   v8_ios_arm64:
@@ -69,14 +61,12 @@ jobs:
     uses: ./.github/workflows/build_v8_linux_x86_64.yml
     with:
       v8_version: ${{ inputs.v8_version }}
-      use_loopback: ${{ inputs.use_loopback }}
     secrets: inherit
 
   v8_linux_arm64:
     uses: ./.github/workflows/build_v8_linux_arm64.yml
     with:
       v8_version: ${{ inputs.v8_version }}
-      use_loopback: ${{ inputs.use_loopback }}
     secrets: inherit
 
   v8_windows_x86_64:
