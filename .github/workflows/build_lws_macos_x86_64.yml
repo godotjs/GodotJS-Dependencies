@@ -61,7 +61,7 @@ jobs:
           cmake --build . --config Release -- -j2
           cd "$GITHUB_WORKSPACE"
           mkdir -p staging/lws/macos_x86_64_release
-          cp -a libwebsockets/include staging/lws/macos_x86_64_release/
+          cp -a libwebsockets/out/include staging/lws/macos_x86_64_release/
           /bin/bash -c 'cd libwebsockets; p=$(find out -name libwebsockets.a -print -quit); cp "$p" "$GITHUB_WORKSPACE/staging/lws/macos_x86_64_release/"'
 
       - name: Upload lws (macOS x86_64)

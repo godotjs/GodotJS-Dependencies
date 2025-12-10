@@ -71,7 +71,7 @@ jobs:
           set -euo pipefail
           cd "$GITHUB_WORKSPACE"
           mkdir -p staging/lws/ios_arm64_release
-          cp -a libwebsockets/include staging/lws/ios_arm64_release/
+          cp -a libwebsockets/out/include staging/lws/ios_arm64_release/
           LWS_LIB_PATH=$(cd libwebsockets/out && find . -name 'libwebsockets.a' -print -quit)
           if [ -z "$LWS_LIB_PATH" ]; then
             echo "libwebsockets.a not found" >&2

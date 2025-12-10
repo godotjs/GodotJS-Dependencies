@@ -56,7 +56,7 @@ jobs:
           cmake --build . --config Release -j$(nproc)
           cd "$GITHUB_WORKSPACE"
           mkdir -p staging/lws/android_arm32_release
-          cp -a libwebsockets/include staging/lws/android_arm32_release/
+          cp -a libwebsockets/out/include staging/lws/android_arm32_release/
           LWS_LIB_PATH=$(cd libwebsockets && find out -name 'libwebsockets.a' -print -quit)
           cp "libwebsockets/${LWS_LIB_PATH}" staging/lws/android_arm32_release/
 

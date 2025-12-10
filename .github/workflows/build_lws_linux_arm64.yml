@@ -52,7 +52,7 @@ jobs:
           $SUDO rm -rf /var/lib/apt/lists/* || true
           cd "$GITHUB_WORKSPACE"
           mkdir -p staging/lws/linux_arm64_release
-          cp -a libwebsockets/include staging/lws/linux_arm64_release/
+          cp -a libwebsockets/out/include staging/lws/linux_arm64_release/
           cp libwebsockets/out/lib/libwebsockets.a staging/lws/linux_arm64_release/
 
       - name: Upload lws (arm64)

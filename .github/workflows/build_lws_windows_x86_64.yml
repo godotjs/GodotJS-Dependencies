@@ -41,7 +41,7 @@ jobs:
           cmake --build . --config Release -- /m
           cd "$env:GITHUB_WORKSPACE"
           New-Item -ItemType Directory -Force -Path staging/lws/windows_x86_64_release | Out-Null
-          Copy-Item -Recurse libwebsockets/include staging/lws/windows_x86_64_release/
+          Copy-Item -Recurse libwebsockets/out/include staging/lws/windows_x86_64_release/
           $lib = Get-ChildItem -Path libwebsockets -Recurse -Filter "*websockets*.lib" | Where-Object { $_.FullName -match "Release" } | Select-Object -First 1
           if (-not $lib) { $lib = Get-ChildItem -Path libwebsockets -Recurse -Filter "*websockets*.lib" | Select-Object -First 1 }
           Copy-Item $lib.FullName staging/lws/windows_x86_64_release/
