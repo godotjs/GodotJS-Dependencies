@@ -62,7 +62,7 @@ jobs:
           cp "libwebsockets/${LWS_LIB_PATH}" staging/lws/android_arm64_release/
 
       - name: Upload
-        if: ${{ env.ACTIONS_RUNTIME_URL != '' }}
+        if: ${{ env.IS_ACT != 'true' || env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: prebuilt_lws_android_arm64

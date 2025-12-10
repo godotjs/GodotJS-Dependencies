@@ -47,7 +47,7 @@ jobs:
           Copy-Item $lib.FullName staging/lws/windows_x86_64_release/
 
       - name: Upload lws (windows x86_64)
-        if: ${{ env.ACTIONS_RUNTIME_URL != '' }}
+        if: ${{ env.IS_ACT != 'true' || env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: prebuilt_lws_windows_x86_64

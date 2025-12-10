@@ -20,6 +20,11 @@ jobs:
       V8_VERSION: ${{ inputs.v8_version || github.event.inputs.v8_version }}
 
     steps:
+      - name: Detect act environment
+        shell: pwsh
+        run: |
+          if ($env:ACT) { echo "IS_ACT=true" >> $env:GITHUB_ENV } else { echo "IS_ACT=false" >> $env:GITHUB_ENV }
+
       - uses: actions/checkout@v4
         with:
           path: Scripts
@@ -81,7 +86,7 @@ jobs:
           ninja -C ./out.gn/x64.release v8_monolith
 
       - name: Upload
-        if: ${{ env.ACTIONS_RUNTIME_URL != '' }}
+        if: ${{ env.IS_ACT != 'true' || env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
           path: v8/v8/out.gn/x64.release/obj/libv8_monolith.a

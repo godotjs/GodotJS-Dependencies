@@ -47,7 +47,7 @@ jobs:
           cp libwebsockets/out/lib/libwebsockets.a staging/lws/linux_x86_64_release/
 
       - name: Upload lws (x86_64)
-        if: ${{ env.ACTIONS_RUNTIME_URL != '' }}
+        if: ${{ env.IS_ACT != 'true' || env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: prebuilt_lws_linux_x86_64
