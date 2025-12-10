@@ -75,6 +75,8 @@ jobs:
           # Clean apt caches after heavy install
           sudo apt-get clean || true
           sudo rm -rf /var/lib/apt/lists/* || true
+
+          python ./build/linux/sysroot_scripts/install-sysroot.py --arch=arm64
           python ./tools/dev/v8gen.py arm64.release
           cp $GITHUB_WORKSPACE/Scripts/v8.linux_arm64.args.gn $GITHUB_WORKSPACE/v8/v8/out.gn/arm64.release/args.gn
           ls -l $GITHUB_WORKSPACE/v8/v8/out.gn/arm64.release/
