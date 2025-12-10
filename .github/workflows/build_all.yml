@@ -91,10 +91,6 @@ jobs:
     uses: ./.github/workflows/build_lws_linux_arm64.yml
     secrets: inherit
 
-  lws_linux_arm32:
-    uses: ./.github/workflows/build_lws_linux_arm32.yml
-    secrets: inherit
-
   # Android LWS builds (use NDK r23c toolchain)
   lws_android_arm64:
     uses: ./.github/workflows/build_lws_android_arm64.yml
@@ -148,7 +144,6 @@ jobs:
       - v8_windows_x86_64
       - lws_linux_x86_64
       - lws_linux_arm64
-      - lws_linux_arm32
       - lws_android_arm64
       - lws_android_arm32
       - lws_android_x86_64
@@ -172,7 +167,6 @@ jobs:
         (needs.v8_windows_x86_64.result == 'success' || needs.v8_windows_x86_64.result == 'skipped') &&
         (needs.lws_linux_x86_64.result == 'success' || needs.lws_linux_x86_64.result == 'skipped') &&
         (needs.lws_linux_arm64.result == 'success' || needs.lws_linux_arm64.result == 'skipped') &&
-        (needs.lws_linux_arm32.result == 'success' || needs.lws_linux_arm32.result == 'skipped') &&
         (needs.lws_android_arm64.result == 'success' || needs.lws_android_arm64.result == 'skipped') &&
         (needs.lws_android_arm32.result == 'success' || needs.lws_android_arm32.result == 'skipped') &&
         (needs.lws_android_x86_64.result == 'success' || needs.lws_android_x86_64.result == 'skipped') &&
