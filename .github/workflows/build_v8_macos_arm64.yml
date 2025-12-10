@@ -62,11 +62,13 @@ jobs:
           ls -l $GITHUB_WORKSPACE/depot_tools/autoninja 
           ninja -C ./out.gn/arm64.release v8_monolith
 
+          cd $GITHUB_WORKSPACE
+          mkdir -p staging/v8/macos.arm64.release
+          cp $GITHUB_WORKSPACE/v8/v8/out.gn/arm64.release/obj/libv8_monolith.a staging/v8/macos.arm64.release/
+
       - name: Upload
         if: ${{ env.IS_ACT != 'true' || env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
-          path: v8/v8/out.gn/arm64.release/obj/libv8_monolith.a
           name: prebuilt_v8_macos_arm64
-
-
+          path: staging/

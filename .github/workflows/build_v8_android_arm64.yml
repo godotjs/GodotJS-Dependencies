@@ -104,11 +104,13 @@ jobs:
           cat $GITHUB_WORKSPACE/v8/v8/out.gn/arm64.release/args.gn
           ninja -C ./out.gn/arm64.release v8_monolith
 
+          cd $GITHUB_WORKSPACE
+          mkdir -p staging/v8/android.arm64.release
+          cp $GITHUB_WORKSPACE/v8/v8/out.gn/arm64.release/obj/libv8_monolith.a staging/v8/android.arm64.release/
+
       - name: Upload
         if: ${{ env.IS_ACT != 'true' || env.ACTIONS_RUNTIME_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
-          path: v8/v8/out.gn/arm64.release/obj/libv8_monolith.a
           name: prebuilt_v8_android_arm64
-
-
+          path: staging/

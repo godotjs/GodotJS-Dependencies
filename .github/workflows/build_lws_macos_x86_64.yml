@@ -70,4 +70,3 @@ jobs:
         with:
           name: prebuilt_lws_macos_x86_64
           path: staging/
-

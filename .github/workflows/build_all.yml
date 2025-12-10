@@ -131,6 +131,8 @@ jobs:
 
   publish:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     needs:
       - v8_android_arm32
       - v8_android_arm64
@@ -198,51 +200,19 @@ jobs:
             mv staging/staging/lws staging/ || true
           fi
 
-          # Create V8 bundle only if present
-          if [ -d "staging/v8" ]; then
-            (cd staging && zip -r "v8_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip" v8/)
-            echo "Created V8 bundle: staging/v8_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip"
-          else
-            echo "No staging/v8 directory found; skipping V8 bundling."
-          fi
+          (cd staging && zip -r "v8_${{ github.event.inputs.v8_version }}.zip" v8/)
+          echo "Created V8 bundle: staging/v8_${{ github.event.inputs.v8_version }}.zip"
 
-          # Create LWS bundle only if present
-          if [ -d "staging/lws" ]; then
-            (cd staging && zip -r "lws_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip" lws/)
-            echo "Created LWS bundle: staging/lws_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip"
-          else
-            echo "No staging/lws directory found; skipping LWS bundling."
-          fi
+          (cd staging && zip -r "lws_4.3.zip" lws/)
+          echo "Created LWS bundle: staging/lws_4.3.zip"
 
-      - uses: actions/create-release@v1
-        id: create_release
+      - name: Create Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v8_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}
-          release_name: v8_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}
-          draft: false
-          prerelease: false
-          body: |
-            Update V8 and LWS bundles.
-      - name: Upload V8 asset
-        if: ${{ hashFiles(format('staging/{0}_{1}_{2}.zip', 'v8', github.event.inputs.v8_version, github.event.inputs.bundle_tag)) != '' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: staging/v8_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip
-          asset_name: v8_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload LWS asset
-        if: ${{ hashFiles(format('staging/lws_4.3_{0}.zip', github.event.inputs.bundle_tag)) != '' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: staging/lws_4.3_${{ github.event.inputs.bundle_tag }}.zip
-          asset_name: lws_4.3_${{ github.event.inputs.bundle_tag }}.zip
-          asset_content_type: application/zip
+        run: |
+          gh release create "${{ github.event.inputs.bundle_tag }}" \
+          staging/*.zip \
+          --title "${{ github.event.inputs.bundle_tag }}" \
+          --notes "Update V8 and LWS bundles." \
+          --repo ${{ github.repository }} \
+          --target ${{ github.sha }}
