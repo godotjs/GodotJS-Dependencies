@@ -25,6 +25,11 @@ jobs:
         run: |
           if ($env:ACT) { echo "IS_ACT=true" >> $env:GITHUB_ENV } else { echo "IS_ACT=false" >> $env:GITHUB_ENV }
 
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true # BYO
+
       - uses: actions/checkout@v4
         with:
           path: Scripts
