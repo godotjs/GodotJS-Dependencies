@@ -237,12 +237,12 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload LWS asset
-        if: ${{ hashFiles(format('staging/{0}_{1}_{2}.zip', 'lws', github.event.inputs.v8_version, github.event.inputs.bundle_tag)) != '' }}
+        if: ${{ hashFiles(format('staging/lws_4.3_{0}.zip', github.event.inputs.bundle_tag)) != '' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: staging/lws_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip
-          asset_name: lws_${{ github.event.inputs.v8_version }}_${{ github.event.inputs.bundle_tag }}.zip
+          asset_path: staging/lws_4.3_${{ github.event.inputs.bundle_tag }}.zip
+          asset_name: lws_4.3_${{ github.event.inputs.bundle_tag }}.zip
           asset_content_type: application/zip
